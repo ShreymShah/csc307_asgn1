@@ -1,9 +1,11 @@
 // backend.js
 import express from "express";
+import cors from "cors";
 
 const app = express();
 const port = 8000;
 
+app.use(cors());
 app.use(express.json());
 
 // Users data structure
@@ -37,29 +39,37 @@ const users = {
   ]
 };
 
-// Helper functions
+// Helper Functions
 const findUserByName = (name) => {
   return users["users_list"].filter(
     (user) => user["name"] === name
   );
 };
 
-const findUserById = (id) =>
-  users["users_list"].find((user) => user["id"] === id);
-
-const addUser = (user) => {
-  users["users_list"].push(user);
-  return user;
-};
-
-// New helper function for Step 7: filter by name AND job
 const findUserByNameAndJob = (name, job) => {
   return users["users_list"].filter(
     (user) => user["name"] === name && user["job"] === job
   );
 };
 
-// New helper function for Step 7: delete user by ID
+const findUserById = (id) =>
+  users["users_list"].find((user) => user["id"] === id);
+
+// Generate a random ID
+const generateId = () => {
+  return Math.random().toString(36).substring(2, 15) + 
+         Math.random().toString(36).substring(2, 15);
+};
+
+const addUser = (user) => {
+  // Add ID if not provided
+  if (!user.id) {
+    user.id = generateId();
+  }
+  users["users_list"].push(user);
+  return user;
+};
+
 const deleteUserById = (id) => {
   const initialLength = users["users_list"].length;
   users["users_list"] = users["users_list"].filter(
@@ -78,26 +88,21 @@ app.get("/users", (req, res) => {
   const name = req.query.name;
   const job = req.query.job;
   
-  // Step 7: Handle filtering by both name and job
   if (name !== undefined && job !== undefined) {
     let result = findUserByNameAndJob(name, job);
     result = { users_list: result };
     res.send(result);
-  }
-  // Original filtering by name only
-  else if (name !== undefined) {
+  } else if (name !== undefined) {
     let result = findUserByName(name);
     result = { users_list: result };
     res.send(result);
-  } 
-  // No filters, return all users
-  else {
+  } else {
     res.send(users);
   }
 });
 
 app.get("/users/:id", (req, res) => {
-  const id = req.params["id"]; //or req.params.id
+  const id = req.params["id"];
   let result = findUserById(id);
   if (result === undefined) {
     res.status(404).send("Resource not found.");
@@ -108,11 +113,10 @@ app.get("/users/:id", (req, res) => {
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
-  addUser(userToAdd);
-  res.status(201).send(userToAdd);
+  const addedUser = addUser(userToAdd);
+  res.status(201).send(addedUser);
 });
 
-// Step 7: New DELETE endpoint to remove a user by ID
 app.delete("/users/:id", (req, res) => {
   const id = req.params["id"];
   const deleted = deleteUserById(id);
