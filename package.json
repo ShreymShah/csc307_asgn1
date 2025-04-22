@@ -8,7 +8,10 @@
   "author": "",
   "license": "ISC",
   "description": "",
-    "workspaces": [
-        "packages/*"
-    ]
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "cors": "^2.8.5"
+  }
 }
