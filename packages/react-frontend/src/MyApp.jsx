@@ -31,7 +31,7 @@ function MyApp() {
   }
 
   function removeOneCharacter(index) {
-    const id = characters[index].id;
+    const id = characters[index]._id; // Changed from id to _id
     
     deleteUser(id)
       .then((response) => {
